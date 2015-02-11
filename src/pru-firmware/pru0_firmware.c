@@ -1,12 +1,12 @@
 #include "pru_firmware.h"
 #include "pru0_firmware.h"
-#include <ehrpwm.h>
-#include <soc_AM335x.h>
+//#include <ehrpwm.h>
+//#include <soc_AM335x.h>
 
 int var_loc[256];
 void wait(int);
 int pwm_val = 0;
-BASE_ADDR = 0x70000000;                    // The baseaddr might be 0x80000000
+//BASE_ADDR = 0x70000000;                    // The baseaddr might be 0x80000000
 
 static void send_ret_value(int val)
 {
@@ -148,16 +148,16 @@ void pwm_handler(int opcode, u32 inst)
         }
 
         /* set pwm value */
-        EHRPWMTimebaseClkConfig(BASE_ADDR,SYSCLK2);
-        EHRPWMClockEnable(BASE_ADDR);
-        EHRPWMChopperEnable(BASE_ADDR);
-        EHRPWMConfigureChopperDuty(BASE_ADDR, val2);
+        //EHRPWMTimebaseClkConfig(BASE_ADDR,SYSCLK2);
+        //EHRPWMClockEnable(BASE_ADDR);
+        //EHRPWMChopperEnable(BASE_ADDR);
+        //EHRPWMConfigureChopperDuty(BASE_ADDR, val2);
         
-        SIGNAL_EVENT(EV_PRU0_PRU1);
-	/*data_sock->info[PRU1][val1] = val2;
+        //SIGNAL_EVENT(EV_PRU0_PRU1);
+	data_sock->info[PRU1][val1] = val2;
 	SIGNAL_EVENT(EV_PRU0_PRU1);
 	send_ret_value(val2);
-	*/
+	
 }
 
 void set_handler(int opcode, u32 inst)
