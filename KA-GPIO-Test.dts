@@ -19,7 +19,7 @@
        part-number = "DM-GPIO-Test";
        version = "00A0";
        exclusive-use=
-       "P9.12", "P9.13", "P9.14", "P9.15", "pruss";
+       "P9.12", "pruss";
        
        fragment@0 {
              target = <&am33xx_pinmux>;
@@ -29,9 +29,6 @@
 			pinctrl-single,pins = <
 
 				0x078 0x07  /* P9_12 60 OUTPUT MODE7 - The LED Output */
-				0x074 0x07  /* P9_13 31 OUTPUT MODE7 - LED Output 2 */
-				0x048 0x07  /* P9_14 50 OUTPUT MODE7 - LED Output 3 */
-                       		0x040 0x07  /* P9_15 48 OUTPUT MODE7 - LED Output 4 */
                                /* OUTPUT  GPIO(mode7) 0x07 pulldown, 0x17 pullup, 0x?f no pullup/down */
 
 			>;
@@ -58,9 +55,6 @@
         		pinctrl-0 = <&pinctrl_test>;
         		gpios         = <
 			&gpio2 28 0
-			&gpio1 31 0
-			&gpio2 18 0
-			&gpio2 16 0
 			>;
     		};  
   	};  
