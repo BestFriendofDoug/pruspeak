@@ -18,7 +18,9 @@
        compatible = "ti,beaglebone", "ti,beaglebone-black";
        part-number = "DM-GPIO-Test";
        version = "00A0";
-
+       exclusive-use=
+       "P9.12", "P9.13", "P9.14", "P9.15", "pruss";
+       
        fragment@0 {
              target = <&am33xx_pinmux>;
             
