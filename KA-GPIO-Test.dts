@@ -57,10 +57,10 @@
       			pinctrl-names = "default";
         		pinctrl-0 = <&pinctrl_test>;
         		gpios         = <
-			&gpio1 60 0
+			&gpio1 28 0
 			&gpio0 31 0
-			&gpio1 50 0
-			&gpio1 48 0
+			&gpio1 18 0
+			&gpio1 16 0
     		};  
   	};  
 };
