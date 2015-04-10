@@ -167,7 +167,7 @@ void pwm_handler(int opcode, u32 inst)
 		int addr = GET_BYTE(inst, 1) + index + 1;
 		val2 = var_loc[addr];
 	}
-	 /* set hi*/
+	 /* set pwm value with val2 */
 	if(val2 && (val1 < MAX_DIO)){
 	
 		if(val1<8){
@@ -175,8 +175,7 @@ void pwm_handler(int opcode, u32 inst)
 		}
 		else{
 			val3 = map_gpio(val1);
-			mmio32(GPIO_OE) = mmio32(GPIO_OE) & ~(1 << val3);
-			mmio32(GPIO_SETDATAOUT) = (1<<(val3));
+			mmio32(EPWM_REG_CMPA) = val2;
 		}
 	}
 	/* set low*/
