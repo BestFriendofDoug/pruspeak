@@ -19,6 +19,78 @@
 	Different syscall values, aliases and their meaning
 */
 
+// PWM module addresses
+
+/* doc: spruh73c, table 2.3 */
+#define PWMSS0_MIO_ADDR 0x48300000
+#define PWMSS1_MIO_ADDR 0x48302000
+#define PWMSS2_MIO_ADDR 0x48304000
+#define PWMSS_MIO_SIZE (4 * 1024)
+
+/* doc: spruh73c, section 15 */
+#define PWMSS_REG_IDVER 0x00
+#define PWMSS_REG_SYSCONFIG 0x04
+#define PWMSS_REG_CLKCONFIG 0x08
+#define PWMSS_REG_CLKSTATUS 0x0c
+#define PWMSS_EPWM_REG_BASE 0x200
+
+/* doc: spruh73c, table 15.59 */
+/* warning: 16 bit registers */
+#define EPWM_REG_TBCTL (PWMSS_EPWM_REG_BASE + 0x00)
+#define EPWM_REG_TBSTS (PWMSS_EPWM_REG_BASE + 0x02)
+#define EPWM_REG_TBHSHR (PWMSS_EPWM_REG_BASE + 0x04)
+#define EPWM_REG_TBPHS (PWMSS_EPWM_REG_BASE + 0x06)
+#define EPWM_REG_TBCNT (PWMSS_EPWM_REG_BASE + 0x08)
+#define EPWM_REG_TBPRD (PWMSS_EPWM_REG_BASE + 0x0a)
+
+/* doc: spruh73c, table 15.65 */
+/* warning: 16 bit registers */
+#define EPWM_REG_CMPCTL (PWMSS_EPWM_REG_BASE + 0x0e)
+#define EPWM_REG_CMPAHR (PWMSS_EPWM_REG_BASE + 0x10)
+#define EPWM_REG_CMPA (PWMSS_EPWM_REG_BASE + 0x12)
+#define EPWM_REG_CMPB (PWMSS_EPWM_REG_BASE + 0x14)
+
+/* doc: spruh73c, table 15.69 */
+/* warning: 16 bit registers */
+#define EPWM_REG_AQCTLA (PWMSS_EPWM_REG_BASE + 0x16)
+#define EPWM_REG_AQCTLB (PWMSS_EPWM_REG_BASE + 0x18)
+#define EPWM_REG_AQSFRC (PWMSS_EPWM_REG_BASE + 0x1a)
+#define EPWM_REG_AQCSFRC (PWMSS_EPWM_REG_BASE + 0x1c)
+
+/* doc: spruh73c, table 15.74 */
+/* warning: 16 bit registers */
+#define EPWM_REG_DBCTL (PWMSS_EPWM_REG_BASE + 0x1e)
+#define EPWM_REG_DBRED (PWMSS_EPWM_REG_BASE + 0x20)
+#define EPWM_REG_DBFED (PWMSS_EPWM_REG_BASE + 0x22)
+
+/* doc: spruh73c, table 15.78 */
+/* warning: 16 bit registers */
+#define EPWM_REG_TZSEL (PWMSS_EPWM_REG_BASE + 0x24)
+#define EPWM_REG_TZCTL (PWMSS_EPWM_REG_BASE + 0x28)
+#define EPWM_REG_TZEINT (PWMSS_EPWM_REG_BASE + 0x2a)
+#define EPWM_REG_TZFLG (PWMSS_EPWM_REG_BASE + 0x2c)
+#define EPWM_REG_TZCLR (PWMSS_EPWM_REG_BASE + 0x2e)
+#define EPWM_REG_TZFRC (PWMSS_EPWM_REG_BASE + 0x30)
+
+/* doc: spruh73c, table 15.85 */
+/* warning: 16 bit registers */
+#define EPWM_REG_ETSEL (PWMSS_EPWM_REG_BASE + 0x32)
+#define EPWM_REG_ETPS (PWMSS_EPWM_REG_BASE + 0x34)
+#define EPWM_REG_ETFLG (PWMSS_EPWM_REG_BASE + 0x36)
+#define EPWM_REG_ETCLR (PWMSS_EPWM_REG_BASE + 0x38)
+#define EPWM_REG_ETFRC (PWMSS_EPWM_REG_BASE + 0x3a)
+
+/* doc: spruh73c, table 15.91 */
+/* warning: 16 bit registers */
+#define EPWM_REG_PCCTL (PWMSS_EPWM_REG_BASE + 0x3c)
+
+/* doc: spruh73c, table 15.99 */
+/* note: doc < rev. j is wrong, register offset is 0xc0. see this post: */
+/* http://e2e.ti.com/support/embedded/starterware/f/790/p/301065/1139333.aspx */
+/* warning: 16 bit registers */
+
+#define EPWM_REG_HRCTL (PWMSS_EPWM_REG_BASE + 0xc0)
+
 //GPIO0 module address
 #define mmio32(x) (*(volatile unsigned long *)(x))
 #define GPIO_1 (0x4804C000)
