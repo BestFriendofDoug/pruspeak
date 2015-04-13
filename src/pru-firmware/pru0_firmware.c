@@ -241,16 +241,16 @@ void pwm_init()
 	// all these are uint16
 	mmio(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
 	mmio(EPWM_REG_TBPHS) = 0;
-	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
+	mmio(EPWM_REG_TBPRD) = 0xfa0; // or maybe 0x10
 	mmio(EPWM_REG_TBCNT) = 0;
 	
-	mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
+	//mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
 	mmio(EPWM_REG_HRCTL) = 2 << 0;
 	
 	/* doc: spruh73c, table 15.66 */
 	mmio(EPWM_REG_CMPCTL) = 0;
 	//Setting PWM Duty Cycle
-	mmio(EPWM_REG_CMPA, 0x5); // or maybe 0x7d0
+	mmio(EPWM_REG_CMPA, 0x7d0); // or maybe 0x5
 	
 	/* doc: spruh73c, table 15.70 */
 	mmio(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
