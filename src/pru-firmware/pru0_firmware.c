@@ -4,7 +4,7 @@
 #include "soc_AM335x.h"
 
 int var_loc[256];
-void wait(int);
+void wait(int,int);
 int pwm_val = 0;
 int BASE_ADDR = 0x70000000;                    // The baseaddr might be 0x80000000
 
@@ -76,12 +76,20 @@ int get_var_val(int addr)
 
 	return 0;
 }
-
+/*maps value to gpio modules*/
+int map_gpio(int val)
+{
+	if (val >= 8) {
+		return ( val - 8 + 21 );
+	}
+	return (val);
+}
 /*instruction handlers*/
 
 void dio_handler(int opcode, u32 inst)
 {
-	int val1, val2;
+	int val1, val2,val3;
+	PRUCFG_SYSCFG = PRUCFG_SYSCFG & (~SYSCFG_STANDBY_INIT);
 	if(opcode == SET_DIO_a){
 	/* SET DIO[c/v], c/v */
 		
@@ -105,15 +113,31 @@ void dio_handler(int opcode, u32 inst)
 		int addr = GET_BYTE(inst, 1) + index + 1;
 		val2 = var_loc[addr];
 	}
-	/* set hi*/
-	if(val2 && (val1 < MAX_DIO)){ 
-        	__R30 = __R30 | ( 1 << val1);
-        }
-
+	 /* set hi*/
+	if(val2 && (val1 < MAX_DIO)){
+	
+		if(val1<8){
+			__R30 = __R30 | ( 1 << val1);
+		}
+		else{
+			val3 = map_gpio(val1);
+			mmio32(GPIO_OE) = mmio32(GPIO_OE) & ~(1 << val3);
+			mmio32(GPIO_SETDATAOUT) = (1<<(val3));
+		}
+	}
 	/* set low*/
-        else{ 
-        	__R30 = __R30 & ~( 1 << val1);
-        }
+	else{
+		if(val1<8){
+			__R30 = __R30 & ~( 1 << val1);
+		}
+	
+		else{
+			val3 = map_gpio(val1);
+			mmio32(GPIO_CLEARDATAOUT) = (1<<(val3));
+		}
+	}
+
+	PRUCFG_SYSCFG = PRUCFG_SYSCFG | SYSCFG_STANDBY_INIT;
 	
 	if(single_command)
 		send_ret_value(val2 ? 1 : 0);
@@ -121,43 +145,126 @@ void dio_handler(int opcode, u32 inst)
 
 void pwm_handler(int opcode, u32 inst)
 {
-	//takes in only PWM[c], c. This will be merged with dio later
-        int val1, val2;
-        if(opcode == SET_PWM_a){
-        /* SET PWM[c/v], c/v */
-
-                val1 = GET_BIT(inst, 23) ? var_loc[GET_BYTE(inst, 1)]: GET_BYTE(inst, 1);
-                val2 = GET_BIT(inst, 22) ? var_loc[GET_BYTE(inst, 0)]: GET_BYTE(inst, 0);
-        }
-
-        else{
-                // "SET PWM[c], arr[v]"  orelse "SET PWM[v] , arr[v]"
-                val1 = (opcode == SET_PWM_b) ? GET_BYTE(inst, 2) : var_loc[GET_BYTE(inst,2)];
-
-                //array size check -- this case same for both case
-                int index = var_loc[GET_BYTE(inst, 0)];
-                if (var_loc[GET_BYTE(inst,1)] <= index ){
-                        //error
-                        if (single_command)
-                                send_ret_value(0);
-                        return;
-                }
-                //if everything okay
-                int addr = GET_BYTE(inst, 1) + index + 1;
-                val2 = var_loc[addr];
-        }
-
-        /* set pwm value */
-//        EHRPWMTimebaseClkConfig(BASE_ADDR,SYSCLK2);
-        EHRPWMClockEnable(BASE_ADDR);
-        EHRPWMChopperEnable(BASE_ADDR);
-        EHRPWMConfigureChopperDuty(BASE_ADDR, val2);
-        
-        SIGNAL_EVENT(EV_PRU0_PRU1);
-	//data_sock->info[PRU1][val1] = val2;
-	//SIGNAL_EVENT(EV_PRU0_PRU1);
-	//send_ret_value(val2);
+	int val1, val2,val3;
+	PRUCFG_SYSCFG = PRUCFG_SYSCFG & (~SYSCFG_STANDBY_INIT);
+	if(opcode == SET_PWM_a){
+	/* SET DIO[c/v], c/v */
+		
+		val1 = GET_BIT(inst, 23) ? var_loc[GET_BYTE(inst, 1)]: GET_BYTE(inst, 1);
+		val2 = GET_BIT(inst, 22) ? var_loc[GET_BYTE(inst, 0)]: GET_BYTE(inst, 0);
+	}
 	
+	else{	
+		// "SET DIO[c], arr[v]"  orelse "SET DIO[v] , arr[v]"
+		val1 = (opcode == SET_PWM_b) ? GET_BYTE(inst, 2) : var_loc[GET_BYTE(inst,2)];
+		
+		//array size check -- this case same for both case
+		int index = var_loc[GET_BYTE(inst, 0)];
+		if (var_loc[GET_BYTE(inst,1)] <= index ){
+			//error
+			if (single_command)
+				send_ret_value(0);
+			return;
+		}
+		//if everything okay
+		int addr = GET_BYTE(inst, 1) + index + 1;
+		val2 = var_loc[addr];
+	}
+	 /* set pwm value with val2 */
+	if(val2 && (val1 < MAX_DIO)){
+	
+		if(val1<8){
+			__R30 = __R30 | ( 1 << val1);
+		}
+		else{
+			val3 = map_gpio(val1);
+			mmio32(EPWM_REG_CMPA) = val2;
+		}
+	}
+	/* set low*/
+	else{
+		if(val1<8){
+			__R30 = __R30 & ~( 1 << val1);
+		}
+	
+		else{
+			val3 = map_gpio(val1);
+			mmio32(GPIO_CLEARDATAOUT) = (1<<(val3));
+		}
+	}
+
+	PRUCFG_SYSCFG = PRUCFG_SYSCFG | SYSCFG_STANDBY_INIT;
+	
+	if(single_command)
+		send_ret_value(val2 ? 1 : 0);
+}
+
+
+// void pwm_handler(int opcode, u32 inst)
+// {
+// 	//takes in only PWM[c], c. This will be merged with dio later
+//         int val1, val2;
+//         if(opcode == SET_PWM_a){
+//         /* SET PWM[c/v], c/v */
+
+//                 val1 = GET_BIT(inst, 23) ? var_loc[GET_BYTE(inst, 1)]: GET_BYTE(inst, 1);
+//                 val2 = GET_BIT(inst, 22) ? var_loc[GET_BYTE(inst, 0)]: GET_BYTE(inst, 0);
+//         }
+
+//         else{
+//                 // "SET PWM[c], arr[v]"  orelse "SET PWM[v] , arr[v]"
+//                 val1 = (opcode == SET_PWM_b) ? GET_BYTE(inst, 2) : var_loc[GET_BYTE(inst,2)];
+
+//                 //array size check -- this case same for both case
+//                 int index = var_loc[GET_BYTE(inst, 0)];
+//                 if (var_loc[GET_BYTE(inst,1)] <= index ){
+//                         //error
+//                         if (single_command)
+//                                 send_ret_value(0);
+//                         return;
+//                 }
+//                 //if everything okay
+//                 int addr = GET_BYTE(inst, 1) + index + 1;
+//                 val2 = var_loc[addr];
+//         }
+
+//         /* set pwm value */
+// 	data_sock->info[PRU1][val1] = val2;
+// 	SIGNAL_EVENT(EV_PRU0_PRU1);
+// 	send_ret_value(val2);
+// }
+void pwm_init()
+{
+	/* enable epwm clock. this is a uint32 */
+	mmio(PWMSS_REG_CLKCONFIG) = 1 << 8; // something to that effect
+	/* doc: spruh73c, table 15.60 */
+	// all these are uint16
+	mmio(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
+	mmio(EPWM_REG_TBPHS) = 0;
+	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
+	mmio(EPWM_REG_TBCNT) = 0;
+	
+	mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
+	mmio(EPWM_REG_HRCTL) = 2 << 0;
+	
+	/* doc: spruh73c, table 15.66 */
+	mmio(EPWM_REG_CMPCTL) = 0;
+	//Setting PWM Duty Cycle
+	mmio(EPWM_REG_CMPA, 0x5); // or maybe 0x7d0
+	
+	/* doc: spruh73c, table 15.70 */
+	mmio(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
+	/* doc: spruh73c, table 15.71 */
+	mmio(EPWM_REG_AQCTLB) = 0;
+	/* doc: spruh73c, table 15.79 */
+	mmio(EPWM_REG_TZSEL) = 0;
+	/* doc: spruh73c, table 15.81 */
+	mmio(EPWM_REG_TZEINT) = 0;
+	/* doc: spruh73c, table 15.86 */
+	mmio(EPWM_REG_ETSEL) = 0;
+	/* doc: spruh73c, table 15.91 */
+	mmio(EPWM_REG_PCCTL) = 0;
+>>>>>>> shubhi
 }
 
 void set_handler(int opcode, u32 inst)
@@ -262,7 +369,7 @@ void array_dec_handler(int opcode, u32 inst)
 void wait_goto_get_handler(int opcode, u32 inst)
 {
 	int op = (GET_BYTE(inst, 2) >> 6);
-	int val;
+	int val,dec;
 	if(op == 0){
 	/* WAIT c*/
 		val = inst & 0xFFFF;
@@ -288,9 +395,14 @@ void wait_goto_get_handler(int opcode, u32 inst)
 	}
 	
 	if(opcode == WAIT){
-		wait(val);
+		wait(val,0);
 	}
-
+	
+	else if (opcode == WAIT_64){
+		inst = get_second_word();
+		dec = inst & 0xFFFF;
+		wait(val,dec);
+	}
 	else if (opcode == GOTO)
 		inst_pointer = val;
 
@@ -680,7 +792,7 @@ void check_event(void)
 
 }
 
-void wait(int ms)
+void wait(int ms,int us)
 {	
 	/* set the CMP0 reg value */
 	//PIEP_CMP_CMP0 =  MS * ms;
@@ -693,7 +805,7 @@ void wait(int ms)
 	PIEP_CMP_CFG |= CMP_CFG_CMP_EN(0);
 
         /* set the CMP0 reg value */
-        PIEP_CMP_CMP0 =  ((MS * ms) + PIEP_COUNT);// % 0xFFFFFFFF;//is the % op needed at all?
+        PIEP_CMP_CMP0 =  ((MS * ms) + (uS * us) + PIEP_COUNT);// % 0xFFFFFFFF;//is the % op needed at all?
 
 	/* clear the timer event for CMP0 incase it has been already set by mistake */
 	PIEP_CMP_STATUS = CMD_STATUS_CMP_HIT(0);
@@ -740,6 +852,7 @@ void execute_instruction()
 		break;
 	
 		case WAIT:
+		case WAIT_64:
 		case GOTO:
 		case GET:
 			wait_goto_get_handler(opcode, inst);
@@ -797,8 +910,8 @@ void timer_init()
 
 int main()
 {
-	
 	timer_init();
+	pwm_init();
 	//send_ret_value(1000);
 	while(1)
 	{
