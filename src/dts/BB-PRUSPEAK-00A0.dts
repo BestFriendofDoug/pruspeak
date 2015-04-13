@@ -45,6 +45,7 @@
 		"P8.28",	/* pru1: pr1_pru1_pru_r30_10 */
 		"P8.29",	/* pru1: pr1_pru1_pru_r30_9 */
 		"P8.30",	/* pru1: pr1_pru1_pru_r30_11 */
+		"P8.36",	/* ehrpwm1A */
 		"P8.39",	/* pru1: pr1_pru1_pru_r30_6 */
 		"P8.40",	/* pru1: pr1_pru1_pru_r30_7 */
 		"P8.41",	/* pru1: pr1_pru1_pru_r30_4 */
@@ -101,6 +102,9 @@
 					0x0a0 0x25	/* lcd_data0.pr1_pru1_pru_r30_0, MODE5 | OUTPUT | PRU */
 					0x0a4 0x25	/* lcd_data1.pr1_pru1_pru_r30_1, MODE5 | OUTPUT | PRU */
 				>;
+			};
+			pwm_p8_36: pinmux_pwm_p8_36_pins {
+				pinctrl-single,pins = <0xc8 0x2>;
 			};
 		};
 	};
