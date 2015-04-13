@@ -240,11 +240,13 @@ void pwm_init()
 	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
 	mmio(EPWM_REG_TBCNT) = 0;
 	
-	mmio(EPWM_REG_CMPAHR) = 0x06 << 8;
+	mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
 	mmio(EPWM_REG_HRCTL) = 2 << 0;
 	
 	/* doc: spruh73c, table 15.66 */
 	mmio(EPWM_REG_CMPCTL) = 0;
+	//Setting PWM Duty Cycle
+	mmio(EPWM_REG_CMPA, 0x5); // or maybe 0x7d0
 	
 	/* doc: spruh73c, table 15.70 */
 	mmio(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
