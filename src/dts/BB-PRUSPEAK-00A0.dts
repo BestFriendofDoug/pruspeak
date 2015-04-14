@@ -69,6 +69,7 @@
 			pru_gpio_pins: pinmux_pru_gpio_pins {
 				pinctrl-single,pins = <
 					0x1a4 0x0f 	/* P9 27 GPIO3_19: mcasp0_fsr.gpio3[19] | MODE7 | OUTPUT */
+					0xc8  0x2	/* P8 36 ehrpwm1A | MODE2 OUTPUT*/
 				>;
 			};
 
@@ -102,9 +103,6 @@
 					0x0a0 0x25	/* lcd_data0.pr1_pru1_pru_r30_0, MODE5 | OUTPUT | PRU */
 					0x0a4 0x25	/* lcd_data1.pr1_pru1_pru_r30_1, MODE5 | OUTPUT | PRU */
 				>;
-			};
-			pwm_p8_36: pinmux_pwm_p8_36_pins {
-				pinctrl-single,pins = <0xc8 0x2>;
 			};
 		};
 	};
