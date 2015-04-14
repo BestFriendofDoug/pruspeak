@@ -264,7 +264,6 @@ void pwm_init()
 	mmio(EPWM_REG_ETSEL) = 0;
 	/* doc: spruh73c, table 15.91 */
 	mmio(EPWM_REG_PCCTL) = 0;
->>>>>>> shubhi
 }
 
 void set_handler(int opcode, u32 inst)
