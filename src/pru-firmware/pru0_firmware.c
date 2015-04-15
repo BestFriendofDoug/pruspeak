@@ -19,7 +19,7 @@ void pwm_init()
 	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
 	mmio(EPWM_REG_TBCNT) = 0;
 	
-	//mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
+	mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
 	mmio(EPWM_REG_HRCTL) = 2 << 0;
 	
 	/* doc: spruh73c, table 15.66 */
