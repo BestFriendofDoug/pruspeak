@@ -16,7 +16,7 @@ void pwm_init()
 	// all these are uint16
 	mmio(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
 	mmio(EPWM_REG_TBPHS) = 0;
-	mmio(EPWM_REG_TBPRD) = 258; // or maybe 0xfa0 or maybe 0x10
+	mmio(EPWM_REG_TBPRD) = 10; // or maybe 0xfa0 or maybe 0x10
 	mmio(EPWM_REG_TBCNT) = 0;
 	
 	mmio(EPWM_REG_CMPAHR) = 60 << 8; //or maybe 0x60
