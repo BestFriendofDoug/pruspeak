@@ -16,16 +16,16 @@ void pwm_init()
 	// all these are uint16
 	mmio(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
 	mmio(EPWM_REG_TBPHS) = 0;
-	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
+	mmio(EPWM_REG_TBPRD) = 258; // or maybe 0xfa0 or maybe 0x10
 	mmio(EPWM_REG_TBCNT) = 0;
 	
-	mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
+	mmio(EPWM_REG_CMPAHR) = 60 << 8; //or maybe 0x60
 	mmio(EPWM_REG_HRCTL) = 2 << 0;
 	
 	/* doc: spruh73c, table 15.66 */
 	mmio(EPWM_REG_CMPCTL) = 0;
 	//Setting PWM Duty Cycle
-	mmio(EPWM_REG_CMPA) = 0x5; // or maybe 0x7d0
+	mmio(EPWM_REG_CMPA) = 5; // or maybe 0x7d0 or maybe 0x5
 	
 	/* doc: spruh73c, table 15.70 */
 	mmio(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
@@ -123,7 +123,6 @@ void dio_handler(int opcode, u32 inst)
 {
 	int val1, val2,val3;
 	PRUCFG_SYSCFG = PRUCFG_SYSCFG & (~SYSCFG_STANDBY_INIT);
-	pwm_init();
 	if(opcode == SET_DIO_a){
 	/* SET DIO[c/v], c/v */
 		
@@ -913,7 +912,7 @@ void timer_init()
 int main()
 {
 	timer_init();
-	//pwm_init();
+	pwm_init();
 	//send_ret_value(1000);
 	while(1)
 	{
