@@ -69,7 +69,7 @@
 			pru_gpio_pins: pinmux_pru_gpio_pins {
 				pinctrl-single,pins = <
 					0x1a4 0x0f 	/* P9 27 GPIO3_19: mcasp0_fsr.gpio3[19] | MODE7 | OUTPUT */
-					0xc8  0x2	/* P8 36 ehrpwm1A | MODE2 OUTPUT*/
+					0x0c8  0x2	/* P8 36 ehrpwm1A | MODE2 OUTPUT*/
 				>;
 			};
 
