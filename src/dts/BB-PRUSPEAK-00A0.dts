@@ -325,6 +325,15 @@
 				};
 
 			};
+			
+			pwm_test_p8_36 {
+				compatible	= "pwm_test";
+				pwm-names 	= "PWM_p8_36";
+				pinctrl-names	= "default";
+				pinctrl-0	= <&pwm_p8_36>;
+				enabled		= <1>;
+				status 		= "okay";
+			};
 
 			pru_speak {
 				compatible = "ti,pru_speak";
