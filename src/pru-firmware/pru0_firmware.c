@@ -8,6 +8,39 @@ void wait(int,int);
 int pwm_val = 0;
 int BASE_ADDR = 0x70000000;                    // The baseaddr might be 0x80000000
 
+void pwm_init()
+{
+	/* enable epwm clock. this is a uint32 */
+	mmio(PWMSS_REG_CLKCONFIG) = 1 << 8; // something to that effect
+	/* doc: spruh73c, table 15.60 */
+	// all these are uint16
+	mmio(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
+	mmio(EPWM_REG_TBPHS) = 0;
+	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
+	mmio(EPWM_REG_TBCNT) = 0;
+	
+	//mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
+	mmio(EPWM_REG_HRCTL) = 2 << 0;
+	
+	/* doc: spruh73c, table 15.66 */
+	mmio(EPWM_REG_CMPCTL) = 0;
+	//Setting PWM Duty Cycle
+	mmio(EPWM_REG_CMPA) = 0x5; // or maybe 0x7d0
+	
+	/* doc: spruh73c, table 15.70 */
+	mmio(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
+	/* doc: spruh73c, table 15.71 */
+	mmio(EPWM_REG_AQCTLB) = 0;
+	/* doc: spruh73c, table 15.79 */
+	mmio(EPWM_REG_TZSEL) = 0;
+	/* doc: spruh73c, table 15.81 */
+	mmio(EPWM_REG_TZEINT) = 0;
+	/* doc: spruh73c, table 15.86 */
+	mmio(EPWM_REG_ETSEL) = 0;
+	/* doc: spruh73c, table 15.91 */
+	mmio(EPWM_REG_PCCTL) = 0;
+}
+
 static void send_ret_value(int val)
 {
 	//TODO : handle multiple params?
@@ -234,38 +267,7 @@ void pwm_handler(int opcode, u32 inst)
 // 	SIGNAL_EVENT(EV_PRU0_PRU1);
 // 	send_ret_value(val2);
 // }
-void pwm_init()
-{
-	/* enable epwm clock. this is a uint32 */
-	mmio(PWMSS_REG_CLKCONFIG) = 1 << 8; // something to that effect
-	/* doc: spruh73c, table 15.60 */
-	// all these are uint16
-	mmio(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
-	mmio(EPWM_REG_TBPHS) = 0;
-	mmio(EPWM_REG_TBPRD) = 0x10; // or maybe 0xfa0
-	mmio(EPWM_REG_TBCNT) = 0;
-	
-	//mmio(EPWM_REG_CMPAHR) = 0x60 << 8;
-	mmio(EPWM_REG_HRCTL) = 2 << 0;
-	
-	/* doc: spruh73c, table 15.66 */
-	mmio(EPWM_REG_CMPCTL) = 0;
-	//Setting PWM Duty Cycle
-	mmio(EPWM_REG_CMPA) = 0x5; // or maybe 0x7d0
-	
-	/* doc: spruh73c, table 15.70 */
-	mmio(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
-	/* doc: spruh73c, table 15.71 */
-	mmio(EPWM_REG_AQCTLB) = 0;
-	/* doc: spruh73c, table 15.79 */
-	mmio(EPWM_REG_TZSEL) = 0;
-	/* doc: spruh73c, table 15.81 */
-	mmio(EPWM_REG_TZEINT) = 0;
-	/* doc: spruh73c, table 15.86 */
-	mmio(EPWM_REG_ETSEL) = 0;
-	/* doc: spruh73c, table 15.91 */
-	mmio(EPWM_REG_PCCTL) = 0;
-}
+
 
 void set_handler(int opcode, u32 inst)
 {
