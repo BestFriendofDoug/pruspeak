@@ -32,7 +32,7 @@
 #define PWMSS_REG_SYSCONFIG 0x04
 #define PWMSS_REG_CLKCONFIG 0x08
 #define PWMSS_REG_CLKSTATUS 0x0c
-#define PWMSS_EPWM_REG_BASE 0x200
+#define PWMSS_EPWM_REG_BASE 0x48300200
 
 /* doc: spruh73c, table 15.59 */
 /* warning: 16 bit registers */
