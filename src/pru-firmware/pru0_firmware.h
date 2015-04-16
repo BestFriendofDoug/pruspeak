@@ -128,6 +128,10 @@
 //clock variable definitions
 #define CM_PER_EPWMSS1_CLKCTRL 0xcc
 
+/* doc: spruh73c, table 2.2 */
+#define CM_PER_MIO_ADDR 0x44e00000
+#define CM_PER_MIO_SIZE (128 * 1024)
+
 /* doc: spruh73c, table 2.3 */
 #define PWMSS0_MIO_ADDR 0x48300000
 #define PWMSS1_MIO_ADDR 0x48302000
