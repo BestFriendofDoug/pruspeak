@@ -10,7 +10,7 @@ int BASE_ADDR = 0x70000000;                    // The baseaddr might be 0x800000
 
 void pwm_init()
 {
-	mmio32(CM_PER_EPWMSS1_CLKCTRL) = 2;
+	mmio32(CM_PER_MIO_ADDR) = CM_PER_EPWMSS1_CLKCTRL;
 	/* enable epwm clock. this is a uint32 */
 	mmio32(PWMSS_REG_CLKCONFIG) = 1 << 8; // something to that effect
 	/* doc: spruh73c, table 15.60 */
