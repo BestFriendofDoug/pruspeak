@@ -125,6 +125,8 @@
 #define ET_2ND 0x2
 #define ET_3RD 0x3
 
+//clock variable definitions
+#define CM_PER_EPWMSS1_CLKCTRL 0xcc
 
 /* doc: spruh73c, table 2.3 */
 #define PWMSS0_MIO_ADDR 0x48300000
