@@ -7,39 +7,169 @@ int var_loc[256];
 void wait(int,int);
 int pwm_val = 0;
 int BASE_ADDR = 0x70000000;                    // The baseaddr might be 0x80000000
+int mio_close(mio_handle_t* mio)
+{
+  munmap((void*)mio->base, mio->size);
+  return 0;
+void mio_write_uint32(mio_handle_t* mio, size_t off, uint32_t x)
+{
+  /* off the offset in bytes */
+  const size_t mio_off = mio->off + off;
+  ((volatile uint32_t*)mio->base)[mio_off / sizeof(uint32_t)] = x;
+}
 
+static int cm_per_enable_pwmss(size_t i)
+{
+	/* enable clocking of the pwmss[i] */
+
+	static const size_t off[] =
+	{
+		CM_PER_EPWMSS0_CLKCTRL,
+		CM_PER_EPWMSS1_CLKCTRL,
+		CM_PER_EPWMSS2_CLKCTRL
+	};
+
+	mio_handle_t mio;
+
+	if (mio_open(&mio, CM_PER_MIO_ADDR, CM_PER_MIO_SIZE)) return -1;
+	mio_write_uint32(&mio, off[i], 2);
+	mio_close(&mio);
+
+	return 0;
+}
+int mio_open(mio_handle_t* mio, size_t off, size_t size)
+{
+  static const size_t page_size = 0x1000;
+  //static const size_t page_mask = page_size - 1;
+  static const size_t page_mask = 0x0111;
+
+  size_t x;
+  int fd;
+
+  fd = open("/dev/mem", O_RDWR | O_SYNC);
+  if (fd == -1) return -1;
+
+  /* align on page size */
+
+  x = off & page_mask;
+  if (x)
+  {
+    mio->off = x;
+    off -= x;
+    size += x;
+  }
+  else
+  {
+    mio->off = 0;
+  }
+
+  x = size & page_mask;
+  if (x) size += page_size - x;
+
+  mio->size = size;
+
+  mio->base = (uintptr_t)
+    mmap(NULL, mio->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, off);
+
+  close(fd);
+
+  if (mio->base == (uintptr_t)MAP_FAILED) return -1;
+
+  return 0;
+}
+void mio_or_uint32(mio_handle_t* mio, size_t off, uint32_t x)
+{
+  const uint32_t xx = mio_read_uint32(mio, off);
+  mio_write_uint32(mio, off, xx | x);
+}
+
+void mio_write_uint16(mio_handle_t* mio, size_t off, uint16_t x)
+{
+  /* off the offset in bytes */
+  const size_t mio_off = mio->off + off;
+  ((volatile uint16_t*)mio->base)[mio_off / sizeof(uint16_t)] = x;
+}
+static int pwmss_set_epwm(mio_handle_t* mio, uint16_t p, uint16_t d, uint16_t hrd)
+{
+	/* mio the pwmss mio region */
+	/* p the period */
+	/* d the duty */
+	/* hrd the high resolution duty */
+
+	/* enable epwm clock */
+	mio_or_uint32(mio, PWMSS_REG_CLKCONFIG, 1 << 8);
+
+	/* doc: spruh73c, table 15.60 */
+	mio_write_uint16(mio, EPWM_REG_TBCTL, (2 << 14) | (3 << 4));
+	mio_write_uint16(mio, EPWM_REG_TBPHS, 0);
+	mio_write_uint16(mio, EPWM_REG_TBPRD, p);
+	mio_write_uint16(mio, EPWM_REG_TBCNT, 0);
+
+	mio_write_uint16(mio, EPWM_REG_CMPAHR, hrd << 8);
+	mio_write_uint16(mio, EPWM_REG_HRCTL, 2 << 0);
+
+	/* doc: spruh73c, table 15.66 */
+	mio_write_uint16(mio, EPWM_REG_CMPCTL, 0);
+	mio_write_uint16(mio, EPWM_REG_CMPA, d);
+
+	/* doc: spruh73c, table 15.70 */
+	mio_write_uint16(mio, EPWM_REG_AQCTLA, (3 << 4) | (2 << 0));
+	/* doc: spruh73c, table 15.71 */
+	mio_write_uint16(mio, EPWM_REG_AQCTLB, 0);
+
+	/* doc: spruh73c, table 15.79 */
+	mio_write_uint16(mio, EPWM_REG_TZSEL, 0);
+	/* doc: spruh73c, table 15.81 */
+	mio_write_uint16(mio, EPWM_REG_TZEINT, 0);
+
+	/* doc: spruh73c, table 15.86 */
+	mio_write_uint16(mio, EPWM_REG_ETSEL, 0);
+
+	/* doc: spruh73c, table 15.91 */
+	mio_write_uint16(mio, EPWM_REG_PCCTL, 0);
+	puts("finished setting epwm");
+	return 0;
+}
+
+int mio_close(mio_handle_t* mio)
+{
+  munmap((void*)mio->base, mio->size);
+  return 0;
+}
+static int pwmss_close(mio_handle_t* mio)
+{
+	mio_close(mio);
+	return 0;
+}
+
+
+static int pwmss_open(mio_handle_t* mio, unsigned int i)
+{
+	/* i the pwmss id, in [0:2] */
+
+	const uintptr_t addr[] =
+	{
+		PWMSS0_MIO_ADDR,
+		PWMSS1_MIO_ADDR,
+		PWMSS2_MIO_ADDR
+	};
+
+	/* enable pwmss clocking */
+	if (cm_per_enable_pwmss(i)) return -1;
+
+	if (mio_open(mio, addr[i], PWMSS_MIO_SIZE)) return -1;
+
+	return 0;
 void pwm_init()
 {
-	mmio32(CM_PER_MIO_ADDR) = CM_PER_EPWMSS1_CLKCTRL;
-	/* enable epwm clock. this is a uint32 */
-	mmio32(PWMSS_REG_CLKCONFIG) = 1 << 8; // something to that effect
-	/* doc: spruh73c, table 15.60 */
-	// all these are uint16
-	mmio32(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
-	mmio32(EPWM_REG_TBPHS) = 0;
-	mmio32(EPWM_REG_TBPRD) = 10; // or maybe 0xfa0 or maybe 0x10
-	mmio32(EPWM_REG_TBCNT) = 0;
-	
-	mmio32(EPWM_REG_CMPAHR) = 60 << 8; //or maybe 0x60
-	mmio32(EPWM_REG_HRCTL) = 2 << 0;
-	
-	/* doc: spruh73c, table 15.66 */
-	mmio32(EPWM_REG_CMPCTL) = 0;
-	//Setting PWM Duty Cycle
-	mmio32(EPWM_REG_CMPA) = 5; // or maybe 0x7d0 or maybe 0x5
-	
-	/* doc: spruh73c, table 15.70 */
-	mmio32(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
-	/* doc: spruh73c, table 15.71 */
-	mmio32(EPWM_REG_AQCTLB) = 0;
-	/* doc: spruh73c, table 15.79 */
-	mmio32(EPWM_REG_TZSEL) = 0;
-	/* doc: spruh73c, table 15.81 */
-	mmio32(EPWM_REG_TZEINT) = 0;
-	/* doc: spruh73c, table 15.86 */
-	mmio32(EPWM_REG_ETSEL) = 0;
-	/* doc: spruh73c, table 15.91 */
-	mmio32(EPWM_REG_PCCTL) = 0;
+	mio_handle_t mio;
+
+	pwmss_open(&mio, 1)
+	pwmss_set_epwm(&mio, 0x10, 0x5, 0x60);
+	pwmss_close(&mio);
+
+	return 0;
+
 }
 
 static void send_ret_value(int val)
