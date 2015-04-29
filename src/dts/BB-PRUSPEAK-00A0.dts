@@ -330,7 +330,7 @@
 				compatible	= "pwm_test";
 				pwm-names 	= "PWM_p8_36";
 				pinctrl-names	= "default";
-				pinctrl-0	= <&pru_gpio_pins>;
+				pinctrl-0	= <&pru_pru_pins>;
 				enabled		= <1>;
 				status 		= "okay";
 			};
