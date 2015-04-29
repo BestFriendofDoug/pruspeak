@@ -13,7 +13,7 @@ void pwm_init()
 	PRUCFG_SYSCFG = PRUCFG_SYSCFG & (~SYSCFG_STANDBY_INIT);
 	mmio32(CM_PER_MIO_ADDR) = CM_PER_EPWMSS1_CLKCTRL;
 	/* enable epwm clock. this is a uint32 */
-	mmio32(PWMSS_REG_CLKCONFIG) = 1 << 8; // 
+	mmio32(PWMSS_REG_CLKCONFIG) = 0x100; // hex 100h
 	/* doc: spruh73c, table 15.60 */
 	// all these are uint16
 	mmio32(EPWM_REG_TBPRD) = 0x258; // hex 258h
