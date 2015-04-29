@@ -13,34 +13,17 @@ void pwm_init()
 	PRUCFG_SYSCFG = PRUCFG_SYSCFG & (~SYSCFG_STANDBY_INIT);
 	mmio32(CM_PER_MIO_ADDR) = CM_PER_EPWMSS1_CLKCTRL;
 	/* enable epwm clock. this is a uint32 */
-	mmio32(PWMSS_REG_CLKCONFIG) = 1 << 8; // something to that effect
+	mmio32(PWMSS_REG_CLKCONFIG) = 1 << 8; // 
 	/* doc: spruh73c, table 15.60 */
 	// all these are uint16
-	mmio32(EPWM_REG_TBCTL) = (2 << 14) | (3 << 4); //or something to that effect
+	mmio32(EPWM_REG_TBPRD) = 0x258; // hex 258h
 	mmio32(EPWM_REG_TBPHS) = 0;
-	mmio32(EPWM_REG_TBPRD) = 10; // or maybe 0xfa0 or maybe 0x10
 	mmio32(EPWM_REG_TBCNT) = 0;
-	
-	mmio32(EPWM_REG_CMPAHR) = 60 << 8; //or maybe 0x60
-	mmio32(EPWM_REG_HRCTL) = 2 << 0;
-	
-	/* doc: spruh73c, table 15.66 */
-	mmio32(EPWM_REG_CMPCTL) = 0;
+	mmio32(EPWM_REG_TBCTL) = 0x30; // hex 30h
 	//Setting PWM Duty Cycle
-	mmio32(EPWM_REG_CMPA) = 5; // or maybe 0x7d0 or maybe 0x5
-	
-	/* doc: spruh73c, table 15.70 */
-	mmio32(EPWM_REG_AQCTLA) = (3 << 4) | (2 << 0);
-	/* doc: spruh73c, table 15.71 */
-	mmio32(EPWM_REG_AQCTLB) = 0;
-	/* doc: spruh73c, table 15.79 */
-	mmio32(EPWM_REG_TZSEL) = 0;
-	/* doc: spruh73c, table 15.81 */
-	mmio32(EPWM_REG_TZEINT) = 0;
-	/* doc: spruh73c, table 15.86 */
-	mmio32(EPWM_REG_ETSEL) = 0;
-	/* doc: spruh73c, table 15.91 */
-	mmio32(EPWM_REG_PCCTL) = 0;
+	mmio32(EPWM_REG_CMPA) = 0x15E; //  hex 15Eh
+	mmio32(EPWM_REG_CMPCTL) = 0;
+	mmio32(EPWM_REG_AQCTLA) = 0x12; // hex 12h
 }
 
 static void send_ret_value(int val)
